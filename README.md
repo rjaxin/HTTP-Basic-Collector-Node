@@ -6,7 +6,4 @@ The functionality is similar to the out-of-the-box [Zero Login Page Collector No
 
 The Custom Node import file can be downloaded [here](HTTP-Basic-Collector-Node.json)
 
-The script source is:
-```javascript
-# src/main.js
-```
+The script source is [here](src/main.js):
