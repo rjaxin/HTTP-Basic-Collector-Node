@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "amVersion": "ForgeRock Access Management 8.1.0-SNAPSHOT Build 0f3c85c8bbc4e5c93454ee525528ade846b19bcb (2025-December-04 22:27)",
+    "exportDate": "2025-12-19T18:22:55.050Z",
+    "origin": "https://openam-yyc-dev.forgeblocks.com/am/json/node-designer/node-type/",
+    "exportedBy": "robert.jackson@pingidentity.com",
+    "resourceVersion": "1.0"
+  },
+  "nodeTypes": {
+    "b1f13bc1911d4d31851deca40739f845-1": {
+      "serviceName": "b1f13bc1911d4d31851deca40739f845",
+      "displayName": "HTTP Basic Collector Node",
+      "description": "A custom node to collect HTTP Basic credentials from authorization header as per rfc7617",
+      "outcomes": [
+        "Has Credentials",
+        "No Credentials"
+      ],
+      "outputs": [],
+      "inputs": [],
+      "script": "\n/*\n* robert.jackson@pingidentity.com 2025-12-19\n* \n* THE CODE HEREUNDER IS PROVIDED \"AS IS\" AND WITHOUT WARRANTY OF ANY KIND. SUCH CODE IS EXPRESSLY EXCLUDED FROM PING IDENTITY'S INDEMNITY \n* OR SUPPORT OBLIGATIONS, IF ANY, PURSUANT TO THE RELEVANT GOVERNING AGREEMENT. PING IDENTITY AND ITS LICENSORS EXPRESSLY DISCLAIM ALL WARRANTIES, \n* WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, \n* AND ANY WARRANTY OF NON-INFRINGEMENT. PING IDENTITY SHALL NOT HAVE ANY LIABILITY ARISING OUT OF OR RELATING TO ANY USE, IMPLEMENTATION OR \n* CONFIGURATION OF THE SAMPLE CODE.\n*\n* Node binding documentation found at: https://docs.pingidentity.com/pingoneaic/latest/am-scripting/script-bindings.html#common-utils\n*/\n\nvar nodeOutcomes = {\n  HAS_CREDENTIALS: \"Has Credentials\",\n  NO_CREDENTIALS: \"No Credentials\",\n  ERROR: \"Error\"\n};\n\nvar nodeConfig = {\n  logPrefix: \"HTTPBasicAuthCustomNode:\"\n}\n\nvar authHeader = requestHeaders.get(\"Authorization\").get(0);\nif (authHeader) {\n  var regex = /^Basic\\s+([a-zA-Z0-9+\\/=]+)$/gmi;\n  var match = regex.exec(authHeader)\n  if (match) {\n    logger.debug(\"{} Basic Authorization header is present\", nodeConfig.logPrefix);\n    try {\n      var decoded = utils.base64.decode(match[1]);\n      var separatorIndex = decoded.indexOf(\":\");\n      if (separatorIndex !== -1) {\n        var username = decoded.substring(0, separatorIndex)\n        var password = decoded.substring(separatorIndex + 1);\n        nodeState.putShared(\"username\", username);\n        nodeState.putTransient(\"password\", password);\n        action.goTo(nodeOutcomes.HAS_CREDENTIALS);\n      } else {\n        logger.error(\"{} Decoded string does not contain a colon separator\", nodeConfig.logPrefix);\n        action.goTo(nodeOutcomes.ERROR);\n      }\n    } catch (e) {\n      logger.error(\"{} Error decoding Base64 string: {}\", nodeConfig.logPrefix, e.message);\n      action.goTo(nodeOutcomes.ERROR);\n    }\n  }\n} else {\n  action.goTo(nodeOutcomes.NO_CREDENTIALS);\n}",
+      "errorOutcome": true,
+      "tags": [
+        "Example",
+        "basic authentication"
+      ],
+      "properties": {}
+    }
+  }
+}
