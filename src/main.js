@@ -14,7 +14,7 @@
 var nodeOutcomes = {
   HAS_CREDENTIALS: "Has Credentials",
   NO_CREDENTIALS: "No Credentials",
-  ERROR: "Error"
+  ERROR: "Script Error"
 };
 
 var nodeConfig = {
@@ -44,6 +44,9 @@ if (authHeader) {
       logger.error("{} Error decoding Base64 string: {}", nodeConfig.logPrefix, e.message);
       action.goTo(nodeOutcomes.ERROR);
     }
+  } else {
+    logger.error("{} Malformed Basic Authorization header or is not Base64 encoded", nodeConfig.logPrefix);
+    action.goTo(nodeOutcomes.NO_CREDENTIALS);
   }
 } else {
   action.goTo(nodeOutcomes.NO_CREDENTIALS);
